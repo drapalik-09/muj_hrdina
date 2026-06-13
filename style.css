@@ -196,7 +196,12 @@ hr{
     gap: var(--mezera);
     font-size: var(--velikost_textu);
 }
-
+footer p{
+    margin: 0;
+    padding: 10px;
+    background-color: var(--barva_card);
+    border-radius: 18px;
+}
 .card, .s1, .s2, .s3 {
     box-sizing: border-box;
     align-items: center;
