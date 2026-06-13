@@ -133,6 +133,17 @@ if (backLink) {
         }
     });
 }
+const backLinkk = document.getElementById('back-linkk');
+if (backLinkk) {
+    backLinkk.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (document.referrer) {
+            window.location.href = document.referrer;
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+}
 
 // =========================================================================
 // 4. KONTROLA REGISTRACE / PŘIHLÁŠENÍ (Spouští se na login.html)

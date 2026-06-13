@@ -611,13 +611,22 @@ footer p{
 }
 @media (max-width: 768px) {
     :root {
-        --velikost_textu: 0.875rem; 
+        --velikost_textu: 1,8rem; 
         --mezera: 5px;         
     }    
     .container {
         flex-direction: column;
         flex-wrap: wrap;
         padding: 10px;
+    }
+    .text{
+        font-size: var(--velikost_textu);
+    }
+    .proc{
+        padding: 0;
+    }
+    .form-label{
+      font-size:var(--velikost_textu) ;
     }
     .image img {
         width: 100%;
