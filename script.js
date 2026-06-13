@@ -24,46 +24,54 @@ function escapeHTML(text) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
 
 function formatDej(text) {
     const normalized = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    return normalized
-        .split(/\n\s*\n/)
-        .map(paragraph => paragraph.trim())
-        .filter(Boolean)
-        .map(paragraph => `<p>${escapeHTML(paragraph).replace(/\n/g, '<br>')}</p>`)
-        .join('');
+    return normalized.split('\n\n').map(p => `<p>${escapeHTML(p)}</p>`).join('');
 }
 
-cards.forEach(card => {
-    card.addEventListener('click', function() {
-        const img = this.querySelector('img');
-        const text = this.querySelector('.popis');
-        
-        if (img) {
-            if (modal) modal.style.display = "flex"; 
-            if (modalImg) modalImg.src = img.src;
+if (cards.length > 0 && modal) {
+    cards.forEach(card => {
+        card.addEventListener('click', function() {
+            const img = this.querySelector('img');
+            if (img) modalImg.src = img.src;
+
+            modalBookTitle.innerText = this.getAttribute('data-title') || '-';
+            infoAutor.innerText = this.getAttribute('data-autor') || '-';
+            infoSerie.innerText = this.getAttribute('data-serie') || '-';
+            infoPoradi.innerText = this.getAttribute('data-poradi') || '-';
+            infoRok.innerText = this.getAttribute('data-rok') || '-';
+
+            const rawDej = this.getAttribute('data-dej') || 'Děj k této knize zatím nebyl přidán.';
+            infoDej.innerHTML = formatDej(rawDej);
+
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
             
             if (spoilerOverlay) spoilerOverlay.classList.remove("active");
             if (spoilerScrollBox) spoilerScrollBox.scrollTop = 0;
-            
-            if (text && modalBookTitle) {
-                modalBookTitle.innerText = text.innerText;
-            } else if (modalBookTitle) {
-                modalBookTitle.innerText = img.alt;
-            }
+        });
+    });
+}
 
-            if (infoAutor) infoAutor.innerText = this.getAttribute('data-autor') || "-";
-            if (infoSerie) infoSerie.innerText = this.getAttribute('data-serie') || "-";
-            if (infoPoradi) infoPoradi.innerText = this.getAttribute('data-poradi') || "-";
-            if (infoRok) infoRok.innerText = this.getAttribute('data-rok') || "-";
-            if (infoDej) infoDej.innerHTML = formatDej(this.getAttribute('data-dej') || "Příběh pro tuto knihu nebyl doplněn.");
+if (closeBtn && modal) {
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = "none";
+        document.body.style.overflow = "auto";
+    });
+}
+
+if (modal) {
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto";
         }
     });
-});
+}
 
 if (spoilerBtn && spoilerOverlay) {
     spoilerBtn.addEventListener('click', function() {
@@ -77,79 +85,60 @@ if (hideSpoilerBtn && spoilerOverlay) {
     });
 }
 
-if (closeBtn && modal) {
-    closeBtn.addEventListener('click', function() {
-        modal.style.display = "none";
+// =========================================================================
+// 2. LIGHTBOX PRO FOTOGALERII (Spouští se na fotogalerie.html)
+// =========================================================================
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+const zaviratko = document.querySelector(".zaviratko");
+const fotky = document.querySelectorAll(".klikaci-foto");
+
+if (fotky.length > 0 && lightbox && lightboxImg) {
+    fotky.forEach(foto => {
+        foto.addEventListener("click", function() {
+            lightbox.style.display = "flex";
+            lightboxImg.src = this.src;
+            document.body.style.overflow = "hidden";
+        });
     });
 }
 
-window.addEventListener('click', function(event) {
-    if (modal && event.target === modal) {
-        modal.style.display = "none";
-    }
-});
-
-window.addEventListener('keydown', function(event) {
-    if (modal && event.key === "Escape" && modal.style.display === "flex") {
-        modal.style.display = "none";
-    }
-});
-
-
-// =========================================================================
-// 2. FOTOGALERIE / LIGHTBOX (Spouští se na fotogalerie.html)
-// =========================================================================
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const zaviratko = document.querySelector('.zaviratko');
-const fotky = document.querySelectorAll('.foto img');
-
-if (lightbox && lightboxImg && fotky.length > 0) {
-    fotky.forEach(img => {
-        img.style.cursor = 'zoom-in';
-        img.addEventListener('click', () => {
-            lightbox.style.display = 'flex';
-            lightboxImg.src = img.src;
-        });
+if (zaviratko && lightbox) {
+    zaviratko.addEventListener("click", function() {
+        lightbox.style.display = "none";
+        document.body.style.overflow = "auto";
     });
+}
 
-    if (zaviratko) {
-        zaviratko.addEventListener('click', () => {
-            lightbox.style.display = 'none';
-        });
-    }
-
-    lightbox.addEventListener('click', (e) => {
-        if (e.target !== lightboxImg && e.target !== zaviratko) {
-            lightbox.style.display = 'none';
+if (lightbox) {
+    lightbox.addEventListener("click", function(e) {
+        if (e.target === lightbox) {
+            lightbox.style.display = "none";
+            document.body.style.overflow = "auto";
         }
     });
 }
 
-
 // =========================================================================
-// 3. TLAČÍTKA ZPĚT (Spouští se na login.html)
+// 3. TLAČÍTKO ZPĚT (Spouští se na login.html)
 // =========================================================================
 const backLink = document.getElementById('back-link');
-const backLinkk = document.getElementById('back-linkk');
-
-function handleBackAction(e) {
-    e.preventDefault();
-    if (history.length > 1) {
-        history.back();
-    } else {
-        window.location.href = 'uvodni_strana.html';
-    }
+if (backLink) {
+    backLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (document.referrer) {
+            window.location.href = document.referrer;
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
 }
-
-if (backLink) backLink.addEventListener('click', handleBackAction);
-if (backLinkk) backLinkk.addEventListener('click', handleBackAction);
-
 
 // =========================================================================
 // 4. KONTROLA REGISTRACE / PŘIHLÁŠENÍ (Spouští se na login.html)
 // =========================================================================
 const loginForm = document.getElementById('login-form');
+const jmenoInput = document.getElementById('username'); 
 const heslo = document.getElementById('heslo');
 const hesloPotvrzeni = document.getElementById('heslo-potvrzeni');
 const chybaText = document.getElementById('chyba-heslo');
@@ -165,8 +154,9 @@ if (loginForm && heslo && hesloPotvrzeni && chybaText) {
             chybaText.style.display = 'none';
             hesloPotvrzeni.style.borderColor = ''; 
             
-            // Uložení přihlášení do prohlížeče
+            // Uložení stavu přihlášení a zadaného jména do paměti prohlížeče
             localStorage.setItem('uzivatelPrihlasen', 'true');
+            localStorage.setItem('jmenoUzivatele', jmenoInput.value || 'Uživatel');
             
             // Přesměrování na stránku "proč"
             window.location.href = 'proc.html';
@@ -174,34 +164,139 @@ if (loginForm && heslo && hesloPotvrzeni && chybaText) {
     });
 }
 
-
 // =========================================================================
-// 5. KONTROLA PŘIHLÁŠENÍ A ŽIVÉ HODNOCENÍ (Spouští se na proc.html)
+// 5. DYNAMICKÉ MENU (LOGIN -> JMÉNO) A ODHLAŠOVÁNÍ (Běží na všech stránkách)
 // =========================================================================
-// HLEDÁME PODLE CLASS, PROTOŽE ID V HTML NEMÁŠ:
-const tlacitkoOdeslat = document.querySelector('.hodnoceni-container .button');
-const upozorneni = document.getElementById('prihlaseni-upozorneni');
-const posuvnik = document.getElementById('hodnoceni');
-const vystup = document.getElementById('aktualni-hodnota');
-
-if (posuvnik && vystup) {
+document.addEventListener("DOMContentLoaded", function() {
     const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
+    const jmeno = localStorage.getItem('jmenoUzivatele');
+    
+    // Vyhledání odkazu na Login v navigačním menu
+    const menuLinks = document.querySelectorAll('.menu a');
+    let loginLink = null;
+    
+    menuLinks.forEach(link => {
+        if (link.getAttribute('href') === 'login.html' || link.textContent.trim() === 'Login') {
+            loginLink = link;
+        }
+    });
 
-    if (jePrihlasen === 'true') {
-        if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'block';
-        if (upozorneni) upozorneni.style.display = 'none';
-        posuvnik.disabled = false;
+    // Pokud je uživatel přihlášen, změníme Login na jméno s rozbalovacím menu
+    if (loginLink && jePrihlasen === 'true' && jmeno) {
+        const liElement = loginLink.parentElement;
         
-        vystup.innerText = posuvnik.value;
+        // Nastavíme relativní pozici kvůli správnému vykreslení dropdownu
+        liElement.style.position = 'relative';
+        
+        // Přepíšeme HTML vnitřku <li>, vložíme šipku dolů ke jménu
+        liElement.innerHTML = `
+            <a href="#" id="user-menu-toggle" style="cursor: pointer;">${escapeHTML(jmeno)} ▾</a>
+            <div id="logout-dropdown" style="display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 120px; background: #283618; border: 2px solid black; border-radius: 8px; z-index: 1000; text-align: center; box-shadow: 0px 4px 8px rgba(0,0,0,0.3);">
+                <a href="#" id="btn-odhlasit" style="padding: 10px; color: white; display: block; text-decoration: none; font-size: 1rem;">Odhlásit se</a>
+            </div>
+        `;
 
-        posuvnik.addEventListener('input', function() {
-            vystup.innerText = this.value;
+        const toggleBtn = document.getElementById('user-menu-toggle');
+        const dropdown = document.getElementById('logout-dropdown');
+        const logoutBtn = document.getElementById('btn-odhlasit');
+
+        // Kliknutí na uživatelské jméno otevře/zavře možnost odhlášení
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
         });
 
+        // Kliknutí na tlačítko "Odhlásit se" vymaže data a obnoví web
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('uzivatelPrihlasen');
+            localStorage.removeItem('jmenoUzivatele');
+            window.location.reload(); 
+        });
+
+        // Zavření dropdown menu, pokud uživatel klikne kamkoliv mimo něj
+        window.addEventListener('click', function(e) {
+            if (!liElement.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
+});
+
+// =========================================================================
+// 6. ŽIVÉ HODNOCENÍ A BLOKACE PRO NEPŘIHLÁŠENÉ / DUPLICITNÍ (Spouští se na proc.html)
+// =========================================================================
+const formHodnoceni = document.querySelector('.hodnoceni-container');
+const tlacitkoOdeslat = document.getElementById('btn-odeslat') || document.querySelector('.hodnoceni-container .button');
+const posuvnik = document.getElementById('hodnoceni');
+const vystup = document.getElementById('aktualni-hodnota');
+const inputJmeno = document.getElementById('skryte-jmeno'); // Načtení skrytého inputu z HTML
+
+if (formHodnoceni && posuvnik && vystup) {
+    const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
+    const jmeno = localStorage.getItem('jmenoUzivatele') || '';
+    
+    // Zjistíme, zda už toto konkrétní jméno v minulosti hlasovalo
+    const uzHlasoval = localStorage.getItem('hlasoval_' + jmeno);
+
+    // Vyhledáme nebo dynamicky vytvoříme textové upozornění
+    let upozorneni = document.getElementById('prihlaseni-upozorneni');
+    if (!upozorneni) {
+        upozorneni = document.createElement('p');
+        upozorneni.id = 'prihlaseni-upozorneni';
+        upozorneni.style.color = '#ff4500';
+        upozorneni.style.fontWeight = 'bold';
+        upozorneni.style.marginTop = '15px';
+        upozorneni.style.marginBottom = '15px';
+        formHodnoceni.insertBefore(upozorneni, tlacitkoOdeslat);
+    }
+
+    if (jePrihlasen === 'true') {
+        if (uzHlasoval === 'true') {
+            // Uživatel je sice přihlášen, ale UŽ Hlasoval
+            if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none';
+            upozorneni.innerText = 'Vaše uživatelské jméno (' + jmeno + ') již hodnocení odeslalo!';
+            upozorneni.style.display = 'block';
+            posuvnik.disabled = true;
+        } else {
+            // Uživatel je přihlášen a JEŠTĚ Nehlasoval -> aktivujeme formulář
+            if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'inline-block';
+            upozorneni.style.display = 'none';
+            posuvnik.disabled = false;
+            
+            // Vložíme aktuální jméno přihlášeného do skrytého políčka pro FormSubmit
+            if (inputJmeno) {
+                inputJmeno.value = jmeno;
+            }
+            
+            vystup.innerText = posuvnik.value;
+            posuvnik.addEventListener('input', function() {
+                vystup.innerText = this.value;
+            });
+        }
     } else {
-        if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none';
-        if (upozorneni) upozorneni.style.display = 'block';
+        // Uživatel NENÍ přihlášen
+        if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none'; 
+        upozorneni.innerText = 'Pro odeslání hodnocení se musíte nejdříve přihlásit!';
+        upozorneni.style.display = 'block';
         posuvnik.disabled = true;
     }
+
+    // Odchycení samotného odeslání formuláře
+    formHodnoceni.addEventListener('submit', function(e) {
+        const kontrolaPrihlaseni = localStorage.getItem('uzivatelPrihlasen');
+        const kontrolaJmena = localStorage.getItem('jmenoUzivatele') || '';
+        const kontrolaHlasu = localStorage.getItem('hlasoval_' + kontrolaJmena);
+
+        if (kontrolaPrihlaseni !== 'true') {
+            e.preventDefault();
+            alert('Hodnocení nemůžete odeslat bez přihlášení!');
+        } else if (kontrolaHlasu === 'true') {
+            e.preventDefault();
+            alert('Z tohoto účtu již bylo hodnocení odesláno!');
+        } else {
+            // Pokud je vše v pořádku, před odesláním na FormSubmit označíme uživatele, že odteď má odhlasováno
+            localStorage.setItem('hlasoval_' + kontrolaJmena, 'true');
+        }
+    });
 }
-// Smazána přebytečná složená závorka, která tam byla navíc
