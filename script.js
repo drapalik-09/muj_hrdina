@@ -227,76 +227,60 @@ document.addEventListener("DOMContentLoaded", function() {
 // 6. ŽIVÉ HODNOCENÍ A BLOKACE PRO NEPŘIHLÁŠENÉ / DUPLICITNÍ (Spouští se na proc.html)
 // =========================================================================
 const formHodnoceni = document.querySelector('.hodnoceni-container');
-const tlacitkoOdeslat = document.getElementById('btn-odeslat') || document.querySelector('.hodnoceni-container .button');
 const posuvnik = document.getElementById('hodnoceni');
 const vystup = document.getElementById('aktualni-hodnota');
 const inputJmeno = document.getElementById('skryte-jmeno'); 
 
 if (formHodnoceni && posuvnik && vystup) {
-    const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
     const jmeno = localStorage.getItem('jmenoUzivatele') || '';
-    
-    // Zjistíme, zda už toto konkrétní jméno v minulosti hlasovalo
     const uzHlasoval = localStorage.getItem('hlasoval_' + jmeno);
+    const upozorneni = document.getElementById('prihlaseni-upozorneni');
 
-    // Vyhledáme existující textové upozornění z HTML
-    let upozorneni = document.getElementById('prihlaseni-upozorneni');
+    // Nastavení vzhledu upozornění
     if (upozorneni) {
         upozorneni.style.color = '#ff4500';
         upozorneni.style.fontWeight = 'bold';
         upozorneni.style.marginTop = '15px';
-        upozorneni.style.marginBottom = '15px';
     }
 
-    if (jePrihlasen === 'true') {
-        if (uzHlasoval === 'true') {
-            // Uživatel je přihlášen, ale už hlasoval
-            if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none';
+    // Živé zobrazování hodnoty na slideru funguje vždy
+    vystup.innerText = posuvnik.value;
+    posuvnik.addEventListener('input', function() {
+        vystup.innerText = this.value;
+    });
+
+    // Zápis jména do skrytého inputu, pokud existuje
+    if (jmeno && inputJmeno) {
+        inputJmeno.value = jmeno;
+    }
+
+    // Hlavní kontrola při pokusu o odeslání
+    formHodnoceni.addEventListener('submit', function(e) {
+        const aktualniJmeno = localStorage.getItem('jmenoUzivatele') || '';
+        const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
+        const uzHlasovalKontrola = localStorage.getItem('hlasoval_' + aktualniJmeno);
+
+        // 1. KROK: Kontrola, zda uživatelské jméno vůbec existuje / je přihlášen
+        if (jePrihlasen !== 'true' || aktualniJmeno.trim() === '') {
+            e.preventDefault(); // Zastaví odeslání do FormSubmit
             if (upozorneni) {
-                upozorneni.innerText = 'Vaše uživatelské jméno (' + jmeno + ') již hodnocení odeslalo!';
+                upozorneni.innerText = 'Chyba: Pro odeslání hodnocení musíte mít zadané uživatelské jméno (přihlaste se)!';
                 upozorneni.style.display = 'block';
             }
-            posuvnik.disabled = true;
-        } else {
-            // Uživatel je přihlášen a ještě nehlasoval -> aktivujeme formulář
-            if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'inline-block';
-            if (upozorneni) upozorneni.style.display = 'none';
-            posuvnik.disabled = false;
-            
-            // Vložíme aktuální jméno přihlášeného do skrytého políčka pro FormSubmit
-            if (inputJmeno) {
-                inputJmeno.value = jmeno;
+            return;
+        }
+
+        // 2. KROK: Kontrola duplicity
+        if (uzHlasovalKontrola === 'true') {
+            e.preventDefault(); // Zastaví odeslání do FormSubmit
+            if (upozorneni) {
+                upozorneni.innerText = 'Z tohoto účtu (' + aktualniJmeno + ') již bylo hodnocení odesláno!';
+                upozorneni.style.display = 'block';
             }
-            
-            vystup.innerText = posuvnik.value;
-            posuvnik.addEventListener('input', function() {
-                vystup.innerText = this.value;
-            });
+            return;
         }
-    } else {
-        // Uživatel NENÍ přihlášen -> Skryjeme tlačítko a zamkneme slider
-        if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none'; 
-        if (upozorneni) {
-            upozorneni.innerText = 'Pro odeslání hodnocení se musíte nejdříve přihlásit!';
-            upozorneni.style.display = 'block';
-        }
-        posuvnik.disabled = true;
-    }
 
-    // Pojistka pro samotné odeslání formuláře (kdyby někdo zkusil obejít skryté tlačítko přes Enter)
-    formHodnoceni.addEventListener('submit', function(e) {
-        const kontrolaPrihlaseni = localStorage.getItem('uzivatelPrihlasen');
-        const kontrolaJmena = localStorage.getItem('jmenoUzivatele') || '';
-        const kontrolaHlasu = localStorage.getItem('hlasoval_' + kontrolaJmena);
-
-        if (kontrolaPrihlaseni !== 'true') {
-            e.preventDefault();
-            alert('Hodnocení nemůžete odeslat bez přihlášení!');
-        } else if (kontrolaHlasu === 'true') {
-            e.preventDefault();
-            alert('Z tohoto účtu již bylo hodnocení odesláno!');
-        } else {
-            localStorage.setItem('hlasoval_' + kontrolaJmena, 'true');
-        }
+        // Pokud prošel oběma kroky, uložíme informaci o hlasování a formulář se odešle
+        localStorage.setItem('hlasoval_' + aktualniJmeno, 'true');
     });
 }
