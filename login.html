@@ -29,8 +29,12 @@
     <main class="login-container">
         <form id="login-form" method="get" action="onsubmit">
             <h1 class="nadpis">Login</h1>
-            <label for="username">Zadejte uživatelské jméno:</label>
+            <label for="username" class="form-label">Zadejte uživatelské jméno:</label>
             <input type="text" id="username" placeholder="Uživatelské jméno" required class="formular-okno">
+            <label for="email" class="form-label">E-mail:</label>
+            <input type="email" id="email" name="email"  required class="formular-okno">            
+            <label for="gander" class="form-label">Pohlaví:</label>
+
             <div class="button-container">
                 <div>
                     <input type="radio" name="gander" id="muz" value="muž">
@@ -50,9 +54,9 @@
                 </div>
 
             </div>
-            <label for="heslo">Zadejte heslo:</label>
+            <label for="heslo" class="form-label">Zadejte heslo:</label>
             <input type="password" id="heslo" placeholder="Heslo" required class="formular-okno">
-            <label for="heslo-potvrzeni">Potvrďte heslo:</label>
+            <label for="heslo-potvrzeni" class="form-label">Potvrďte heslo:</label>
             <input type="password" id="heslo-potvrzeni" placeholder="Heslo znovu" required class="formular-okno">
             
             <p id="chyba-heslo" class="chyba-text">Hesla se neshodují!</p>

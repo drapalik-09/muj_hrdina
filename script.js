@@ -180,9 +180,23 @@ if (loginForm && heslo && hesloPotvrzeni && chybaText) {
 // =========================================================================
 // HLEDÁME PODLE CLASS, PROTOŽE ID V HTML NEMÁŠ:
 const tlacitkoOdeslat = document.querySelector('.hodnoceni-container .button');
+const hodnoceniForm = document.querySelector('.hodnoceni-container');
 const upozorneni = document.getElementById('prihlaseni-upozorneni');
 const posuvnik = document.getElementById('hodnoceni');
 const vystup = document.getElementById('aktualni-hodnota');
+
+const hodnoceniOdeslano = localStorage.getItem('hodnoceniOdeslano') === 'true';
+
+if (hodnoceniOdeslano && hodnoceniForm) {
+    hodnoceniForm.style.display = 'none';
+}
+
+if (hodnoceniForm) {
+    hodnoceniForm.addEventListener('submit', function() {
+        localStorage.setItem('hodnoceniOdeslano', 'true');
+        this.style.display = 'none';
+    });
+}
 
 if (posuvnik && vystup) {
     const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
