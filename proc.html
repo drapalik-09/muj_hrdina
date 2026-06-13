@@ -36,16 +36,16 @@
         </section>
         <form class="hodnoceni-container" action="https://formsubmit.co/webhod@seznam.cz" method="POST">
             <label for="hodnoceni">Ohodnoťte mojí stránku</label>
-    
+
             <input type="range" name="hodnoceni" id="hodnoceni" step="1" min="0" max="100" value="50">
             <div class="hodnota-vystup"><span id="aktualni-hodnota">50</span> / 100</div>
-    
-            <input type="hidden" name="uzivatel" id="skryte-jmeno" value="Nepřihlášený host">
 
-            <p id="prihlaseni-upozorneni" style="display: none;"></p>
-    
-            <input type="hidden" name="_next" value="http://localhost:5500/proc.html"> 
-    
+         <input type="hidden" name="uzivatel" id="skryte-jmeno" value="Nepřihlášený host">
+
+            <p id="prihlaseni-upozorneni"></p>
+
+        <input type="hidden" name="_next" value="http://localhost:5500/proc.html"> 
+
             <button type="submit" class="button" id="btn-odeslat">Odeslat hodnocení</button>
         </form>
     </main>

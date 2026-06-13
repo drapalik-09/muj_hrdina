@@ -230,7 +230,7 @@ const formHodnoceni = document.querySelector('.hodnoceni-container');
 const tlacitkoOdeslat = document.getElementById('btn-odeslat') || document.querySelector('.hodnoceni-container .button');
 const posuvnik = document.getElementById('hodnoceni');
 const vystup = document.getElementById('aktualni-hodnota');
-const inputJmeno = document.getElementById('skryte-jmeno'); // Načtení skrytého inputu z HTML
+const inputJmeno = document.getElementById('skryte-jmeno'); 
 
 if (formHodnoceni && posuvnik && vystup) {
     const jePrihlasen = localStorage.getItem('uzivatelPrihlasen');
@@ -239,29 +239,28 @@ if (formHodnoceni && posuvnik && vystup) {
     // Zjistíme, zda už toto konkrétní jméno v minulosti hlasovalo
     const uzHlasoval = localStorage.getItem('hlasoval_' + jmeno);
 
-    // Vyhledáme nebo dynamicky vytvoříme textové upozornění
+    // Vyhledáme existující textové upozornění z HTML
     let upozorneni = document.getElementById('prihlaseni-upozorneni');
-    if (!upozorneni) {
-        upozorneni = document.createElement('p');
-        upozorneni.id = 'prihlaseni-upozorneni';
+    if (upozorneni) {
         upozorneni.style.color = '#ff4500';
         upozorneni.style.fontWeight = 'bold';
         upozorneni.style.marginTop = '15px';
         upozorneni.style.marginBottom = '15px';
-        formHodnoceni.insertBefore(upozorneni, tlacitkoOdeslat);
     }
 
     if (jePrihlasen === 'true') {
         if (uzHlasoval === 'true') {
-            // Uživatel je sice přihlášen, ale UŽ Hlasoval
+            // Uživatel je přihlášen, ale už hlasoval
             if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none';
-            upozorneni.innerText = 'Vaše uživatelské jméno (' + jmeno + ') již hodnocení odeslalo!';
-            upozorneni.style.display = 'block';
+            if (upozorneni) {
+                upozorneni.innerText = 'Vaše uživatelské jméno (' + jmeno + ') již hodnocení odeslalo!';
+                upozorneni.style.display = 'block';
+            }
             posuvnik.disabled = true;
         } else {
-            // Uživatel je přihlášen a JEŠTĚ Nehlasoval -> aktivujeme formulář
+            // Uživatel je přihlášen a ještě nehlasoval -> aktivujeme formulář
             if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'inline-block';
-            upozorneni.style.display = 'none';
+            if (upozorneni) upozorneni.style.display = 'none';
             posuvnik.disabled = false;
             
             // Vložíme aktuální jméno přihlášeného do skrytého políčka pro FormSubmit
@@ -275,14 +274,16 @@ if (formHodnoceni && posuvnik && vystup) {
             });
         }
     } else {
-        // Uživatel NENÍ přihlášen
+        // Uživatel NENÍ přihlášen -> Skryjeme tlačítko a zamkneme slider
         if (tlacitkoOdeslat) tlacitkoOdeslat.style.display = 'none'; 
-        upozorneni.innerText = 'Pro odeslání hodnocení se musíte nejdříve přihlásit!';
-        upozorneni.style.display = 'block';
+        if (upozorneni) {
+            upozorneni.innerText = 'Pro odeslání hodnocení se musíte nejdříve přihlásit!';
+            upozorneni.style.display = 'block';
+        }
         posuvnik.disabled = true;
     }
 
-    // Odchycení samotného odeslání formuláře
+    // Pojistka pro samotné odeslání formuláře (kdyby někdo zkusil obejít skryté tlačítko přes Enter)
     formHodnoceni.addEventListener('submit', function(e) {
         const kontrolaPrihlaseni = localStorage.getItem('uzivatelPrihlasen');
         const kontrolaJmena = localStorage.getItem('jmenoUzivatele') || '';
@@ -295,7 +296,6 @@ if (formHodnoceni && posuvnik && vystup) {
             e.preventDefault();
             alert('Z tohoto účtu již bylo hodnocení odesláno!');
         } else {
-            // Pokud je vše v pořádku, před odesláním na FormSubmit označíme uživatele, že odteď má odhlasováno
             localStorage.setItem('hlasoval_' + kontrolaJmena, 'true');
         }
     });
